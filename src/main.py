@@ -1,6 +1,7 @@
 import cv2, math, random
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import animation
 from collections import defaultdict
 from PIL import Image
 from shapes import Shape
@@ -41,53 +42,70 @@ constraints['all_colours'] = list(img.getdata())
 
 img = np.array(img)
 average_colour = img.mean(axis=0).mean(axis=0)
-canvas = np.full(shape=img.shape, fill_value=average_colour, dtype=np.int8)
-# canvas = np.zeros_like(img, dtype=np.uint8)
-# canvas[:] = 255
-# canvas = canvas.astype(np.int8)
+# canvas = np.full(shape=img.shape, fill_value=average_colour, dtype=np.int8)
+canvas = np.zeros_like(img, dtype=np.uint8)
+canvas[:] = 255
+canvas = canvas.astype(np.int8)
 
 # hyper params
 count = 0
 temperature = 200
 temp_decay = 1
-prev_score = math.inf
+prev_loss = math.inf
 all_losses = []
+all_images = []
 
 # simulated annealing
+new_canvas = canvas
 while temperature != 1:
     new_shape = Shape(constraints)
     
-    new_canvas, canvas = new_shape.superimpose(canvas) # C -> N
-    score = get_loss(img, new_canvas) # ∆E
+    new_canvas, canvas = new_shape.superimpose(new_canvas) # C -> N
+    loss = get_loss(img, new_canvas) # ∆E
     
     # hill climbing
-    if score < prev_score:
-        new_shape.describe()
+    new_mut_canvas = canvas
+    if loss < prev_loss:
         mutated_shape = mutate(new_shape)
-        new_mut_canvas, canvas = mutated_shape.superimpose(canvas)
-        mut_score = get_loss(img, new_mut_canvas)
+        new_mut_canvas, canvas = mutated_shape.superimpose(new_mut_canvas)
+        mut_loss = get_loss(img, new_mut_canvas)
         
-        if score > mut_score:
+        if loss > mut_loss:
             canvas = new_canvas
-            mutated_shape.describe()
-            all_losses.append(score)
+            all_images.append(new_canvas)
+            all_losses.append(loss)
         else:
             canvas = new_mut_canvas
-            all_losses.append(mut_score)
+            all_images.append(new_mut_canvas)
+            all_losses.append(mut_loss)
             
-    elif np.exp(-score / temperature) > np.random.uniform(0, 1):
+    elif np.exp(-loss / temperature) > np.random.uniform(0, 1):
         canvas = new_canvas
-        prev_score = score    
+        prev_loss = loss    
         
     temperature -= temp_decay
     count += 1
 
-plt.figure(1)
-plt.subplot(121)
-plt.imshow(canvas, cmap="gray", vmin=0, vmax=255)
-plt.subplot(122)
-plt.imshow(img)
+# plt.figure(1)
+# plt.subplot(121)
+# plt.imshow(canvas, cmap="gray", vmin=0, vmax=255)
+# plt.subplot(122)
+# plt.imshow(img)
+# plt.show()
+
+fig = plt.figure()
+ax = plt.axes()
+line, = ax.plot([], [], lw=2)
+
+def init():
+    line.set_data([], [])
+    return line,
+
+for i in range(len(all_images)):
+    all_images[i] = [plt.imshow(all_images[i], animated=True)]
+    
+anim = animation.ArtistAnimation(fig, all_images, blit=True, repeat_delay=5000)
 plt.show()
 
-plt.plot(range(count), all_losses, color="green")
-plt.show()
+# plt.plot(range(count), all_losses, color="green")
+# plt.show()
