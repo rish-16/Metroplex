@@ -1,2 +1,2 @@
 # Metroplex
-Using genetic algorithms to recreate images using different shapes
+Using Genetic Algorithms to recreate images using different shapes with Simulated Annealing
