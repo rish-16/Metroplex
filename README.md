@@ -1,2 +1,2 @@
 # Metroplex
-Using Genetic Algorithms to recreate images using different shapes with Simulated Annealing
+Using Genetic Algorithms and Simulated Annealing to recreate images with shapes of different colours and sizes.
