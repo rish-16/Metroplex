@@ -15,16 +15,16 @@ def read_image(path):
     return img, constraints
     
 # def mutate(shape):
-#     theta = 0.4
-#     if np.random.uniform(0, 1) < theta:
+#     epsilon = 0.4
+#     if np.random.uniform(0, 1) < epsilon:
 #         shape.x = np.random.randint(shape.constraints['width'])
-#     if np.random.uniform(0, 1) < theta:
+#     if np.random.uniform(0, 1) < epsilon:
 #         shape.y = np.random.randint(shape.constraints['height'])
-#     if np.random.uniform(0, 1) < theta:
+#     if np.random.uniform(0, 1) < epsilon:
 #         shape.rad = np.random.randint(shape.constraints['width'])
-#     if np.random.uniform(0, 1) < theta:
+#     if np.random.uniform(0, 1) < epsilon:
 #         shape.alpha = float('{:.2f}'.format(np.random.uniform(0, 1)))
-#     if np.random.uniform(0, 1) < theta:
+#     if np.random.uniform(0, 1) < epsilon:
 #         shape.colour = random.choice(shape.constraints['all_colours'])
     
 #     return shape
