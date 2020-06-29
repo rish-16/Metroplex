@@ -1,12 +1,12 @@
 import numpy as np
-import cv2
-import random
+import cv2, random
+from skimage.measure import compare_ssim
 
 class Shape:
     def __init__(self, constraints):
         self.constraints = constraints
         self.colour = random.choice(constraints['all_colours'])
-        self.rad = np.random.randint(constraints['width'])
+        self.rad = np.random.randint(50)
         self.x = np.random.randint(constraints['width'])
         self.y = np.random.randint(constraints['height'])
         self.alpha = float('{:.2f}'.format(np.random.uniform(0, 1)))
@@ -20,3 +20,9 @@ class Shape:
         
     def describe(self):
         print (self.rad, self.colour, self.alpha, (self.x, self.y))
+        
+    # standard Structural Similarity Index (SSIM) loss
+    def get_score(self, og_img, gen_img):
+        (score, diff) = compare_ssim(og_img, gen_img, full=True, multichannel=True)
+        
+        return score

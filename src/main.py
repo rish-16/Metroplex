@@ -2,7 +2,6 @@ import cv2, math, random
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from collections import defaultdict
 from PIL import Image
 from shapes import Shape
 
@@ -15,84 +14,61 @@ def read_image(path):
     
     return img, constraints
     
-# standard MSE loss
-def get_loss(imageA, imageB):
-    err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
-    err /= float(imageA.shape[0] * imageA.shape[1])
+# def mutate(shape):
+#     theta = 0.4
+#     if np.random.uniform(0, 1) < theta:
+#         shape.x = np.random.randint(shape.constraints['width'])
+#     if np.random.uniform(0, 1) < theta:
+#         shape.y = np.random.randint(shape.constraints['height'])
+#     if np.random.uniform(0, 1) < theta:
+#         shape.rad = np.random.randint(shape.constraints['width'])
+#     if np.random.uniform(0, 1) < theta:
+#         shape.alpha = float('{:.2f}'.format(np.random.uniform(0, 1)))
+#     if np.random.uniform(0, 1) < theta:
+#         shape.colour = random.choice(shape.constraints['all_colours'])
     
-    return err
+#     return shape
     
-def mutate(shape):
-    theta = 0.4
-    if np.random.uniform(0, 1) < theta:
-        shape.x = np.random.randint(shape.constraints['width'])
-    if np.random.uniform(0, 1) < theta:
-        shape.y = np.random.randint(shape.constraints['height'])
-    if np.random.uniform(0, 1) < theta:
-        shape.rad = np.random.randint(shape.constraints['width'])
-    if np.random.uniform(0, 1) < theta:
-        shape.alpha = float('{:.2f}'.format(np.random.uniform(0, 1)))
-    if np.random.uniform(0, 1) < theta:
-        shape.colour = random.choice(shape.constraints['all_colours'])
-    
-    return shape
-    
-img, constraints = read_image("../assets/sky.jpg")
-constraints['all_colours'] = list(img.getdata())
+target, constraints = read_image("../assets/sky.jpg")
+constraints['all_colours'] = list(target.getdata())
 
-img = np.array(img)
-average_colour = img.mean(axis=0).mean(axis=0)
-# canvas = np.full(shape=img.shape, fill_value=average_colour, dtype=np.int8)
-canvas = np.zeros_like(img, dtype=np.uint8)
+target = np.array(target, dtype=np.int8)
+average_colour = target.mean(axis=0).mean(axis=0)
+# canvas = np.full(shape=target.shape, fill_value=average_colour, dtype=np.int8)
+canvas = np.zeros_like(target, dtype=np.uint8)
 canvas[:] = 255
 canvas = canvas.astype(np.int8)
 
 # hyper params
-count = 0
-temperature = 200
-temp_decay = 1
-prev_loss = math.inf
+T_max = 250
+T_min = 1
+delta_T = 0.9
+temps = np.arange(T_max, T_min, -delta_T)
+theta = 0.2
 all_losses = []
 all_images = []
 
 # simulated annealing
-new_canvas = canvas
-while temperature != 1:
-    new_shape = Shape(constraints)
+for i in range(len(temps)):
+    T = temps[i]
     
-    new_canvas, canvas = new_shape.superimpose(new_canvas) # C -> N
-    loss = get_loss(img, new_canvas) # ∆E
+    shape = Shape(constraints) # random shape
     
-    # hill climbing
-    new_mut_canvas = canvas
-    if loss < prev_loss:
-        mutated_shape = mutate(new_shape)
-        new_mut_canvas, canvas = mutated_shape.superimpose(new_mut_canvas)
-        mut_loss = get_loss(img, new_mut_canvas)
-        
-        if loss > mut_loss:
-            canvas = new_canvas
-            all_images.append(new_canvas)
-            all_losses.append(loss)
-        else:
-            canvas = new_mut_canvas
-            all_images.append(new_mut_canvas)
-            all_losses.append(mut_loss)
-            
-    elif np.exp(-loss / temperature) > np.random.uniform(0, 1):
-        canvas = new_canvas
-        prev_loss = loss    
-        
-    temperature -= temp_decay
-    count += 1
-
-# plt.figure(1)
-# plt.subplot(121)
-# plt.imshow(canvas, cmap="gray", vmin=0, vmax=255)
-# plt.subplot(122)
-# plt.imshow(img)
-# plt.show()
-
+    canvas_with_shape, canvas = shape.superimpose(canvas) # C -> N
+    score = shape.get_score(target, canvas_with_shape) # ∆E
+    
+    all_losses.append(score)
+    
+    if score > theta: # accept good shapes only
+        canvas = canvas_with_shape
+    elif np.exp(-score / T) > np.random.uniform(0, 1): # accept any reasonable shape
+        canvas = canvas_with_shape
+    else:
+        pass # shape has failed -> will not be part of generated image
+    
+    all_images.append(canvas)
+    
+# animating image generation process
 fig = plt.figure()
 ax = plt.axes()
 line, = ax.plot([], [], lw=2)
@@ -107,5 +83,5 @@ for i in range(len(all_images)):
 anim = animation.ArtistAnimation(fig, all_images, blit=True, repeat_delay=5000)
 plt.show()
 
-# plt.plot(range(count), all_losses, color="green")
+# plt.plot(temps, all_losses, color="green")
 # plt.show()
