@@ -34,7 +34,7 @@ def mutate(shape):
     if np.random.uniform(0, 1) < gamma:
         shape.y = np.random.randint(shape.constraints['height'])
     if np.random.uniform(0, 1) < gamma:
-        shape.rad = np.random.randint(75)
+        shape.rad = np.random.randint(100)
     if np.random.uniform(0, 1) < gamma:
         shape.alpha = float('{:.2f}'.format(np.random.choice(np.arange(0, 1, 0.05))))
     if np.random.uniform(0, 1) < gamma:
@@ -50,11 +50,11 @@ canvas = np.zeros_like(target)
 canvas[:] = 255
 
 # hyper params
-T_max = 500
+T_max = 1000
 T_min = 1
-delta_T = 0.9 # temperature decay
+delta_T = 0.1 # temperature decay
 temps = np.arange(T_max, T_min, -delta_T)
-theta = 0.4
+theta = 1
 all_losses = []
 all_images = []
 
@@ -65,26 +65,24 @@ for i in range(len(temps)):
     shape = Shape(constraints)
     
     canvas_with_shape = shape.superimpose(canvas)
-    epsilon = get_score(target, canvas)
-    epsilon_shape = get_score(target, canvas_with_shape)
+    epsilon = nrmse(target, canvas)
+    epsilon_shape = nrmse(target, canvas_with_shape)
     
-    print (nrmse(target, canvas), nrmse(target, canvas_with_shape))
-    
-    if epsilon_shape > epsilon > theta: # shape brings canvas closer to target
+    if epsilon_shape < epsilon < theta: # shape brings canvas closer to target
         
         # hill climbing
         mut_shape = mutate(shape)
         canvas_mut_shape = mut_shape.superimpose(canvas)
-        epsilon_mut = get_score(target, canvas_mut_shape)
+        epsilon_mut = nrmse(target, canvas_mut_shape)
         
-        if epsilon_mut > epsilon_shape: # mutated shape is better than original shape
+        if epsilon_mut < epsilon_shape: # mutated shape is better than original shape
             canvas = canvas_mut_shape
             epsilon = epsilon_mut
         else:
             canvas = canvas_with_shape
             epsilon = epsilon_shape
             
-    elif np.exp(-epsilon / T) > np.random.uniform(0, 1):
+    elif np.exp(-epsilon / T) < np.random.uniform(0, 1):
         canvas = canvas_with_shape
         epsilon = epsilon_shape
         

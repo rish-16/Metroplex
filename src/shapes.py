@@ -5,7 +5,7 @@ class Shape:
     def __init__(self, constraints):
         self.constraints = constraints
         self.colour = random.choice(constraints['all_colours'])
-        self.rad = np.random.randint(75)
+        self.rad = np.random.randint(100)
         self.x = np.random.randint(constraints['width'])
         self.y = np.random.randint(constraints['height'])
         self.alpha = float('{:.2f}'.format(np.random.choice(np.arange(0, 1, 0.05))))
