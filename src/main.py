@@ -21,37 +21,34 @@ def read_image(path):
     
     return img, constraints
     
-# def mutate(shape):
-#     epsilon = 0.4
-#     if np.random.uniform(0, 1) < epsilon:
-#         shape.x = np.random.randint(shape.constraints['width'])
-#     if np.random.uniform(0, 1) < epsilon:
-#         shape.y = np.random.randint(shape.constraints['height'])
-#     if np.random.uniform(0, 1) < epsilon:
-#         shape.rad = np.random.randint(shape.constraints['width'])
-#     if np.random.uniform(0, 1) < epsilon:
-#         shape.alpha = float('{:.2f}'.format(np.random.uniform(0, 1)))
-#     if np.random.uniform(0, 1) < epsilon:
-#         shape.colour = random.choice(shape.constraints['all_colours'])
+def mutate(shape):
+    gamma = 0.4
+    if np.random.uniform(0, 1) < gamma:
+        shape.x = np.random.randint(shape.constraints['width'])
+    if np.random.uniform(0, 1) < gamma:
+        shape.y = np.random.randint(shape.constraints['height'])
+    if np.random.uniform(0, 1) < gamma:
+        shape.rad = np.random.randint(100)
+    if np.random.uniform(0, 1) < gamma:
+        shape.alpha = float('{:.2f}'.format(np.random.uniform(0, 1)))
+    if np.random.uniform(0, 1) < gamma:
+        shape.colour = random.choice(shape.constraints['all_colours'])
     
-#     return shape
+    return shape
     
 target, constraints = read_image("../assets/sky.jpg")
 constraints['all_colours'] = list(target.getdata())
 
-target = np.array(target, dtype=np.int8)
-average_colour = target.mean(axis=0).mean(axis=0)
-# canvas = np.full(shape=target.shape, fill_value=average_colour, dtype=np.int8)
-canvas = np.zeros_like(target, dtype=np.uint8)
+target = np.array(target)
+canvas = np.zeros_like(target)
 canvas[:] = 255
-canvas = canvas.astype(np.int8)
 
 # hyper params
-T_max = 400
+T_max = 500
 T_min = 1
 delta_T = 0.9 # temperature decay
 temps = np.arange(T_max, T_min, -delta_T)
-theta = 0.2
+theta = 0.4
 all_losses = []
 all_images = []
 
@@ -66,8 +63,19 @@ for i in range(len(temps)):
     epsilon_shape = get_score(target, canvas_with_shape)
     
     if epsilon_shape > epsilon > theta: # shape brings canvas closer to target
-        canvas = canvas_with_shape
-        epsilon = epsilon_shape
+        
+        # hill climbing
+        mut_shape = mutate(shape)
+        canvas_mut_shape = mut_shape.superimpose(canvas)
+        epsilon_mut = get_score(target, canvas_mut_shape)
+        
+        if epsilon_mut > epsilon_shape: # mutated shape is better than original shape
+            canvas = canvas_mut_shape
+            epsilon = epsilon_mut
+        else:
+            canvas = canvas_with_shape
+            epsilon = epsilon_shape
+            
     elif np.exp(-epsilon / T) > np.random.uniform(0, 1):
         canvas = canvas_with_shape
         epsilon = epsilon_shape
@@ -77,9 +85,9 @@ for i in range(len(temps)):
     
 plt.figure(1)
 plt.subplot(121)
-plt.imshow(all_images[-1])    
-plt.subplot(122)
 plt.imshow(canvas)
+plt.subplot(122)
+plt.imshow(target)
 plt.show()
     
 # animating image generation process
