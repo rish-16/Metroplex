@@ -4,14 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from PIL import Image
 from shapes import Shape
-from skimage.measure import compare_ssim
 
-# standard SSIM score [-1, +1]
-def get_score(og_img, gen_img):
-    (score, diff) = compare_ssim(og_img, gen_img, full=True, multichannel=True)
-        
-    return score
-    
+# normalized to [0, 1]
 def nrmse(og_img, gen_img):
     mse = np.sqrt(np.mean(np.square(og_img - gen_img)))
     err = mse / (og_img.max() - og_img.min())
@@ -34,7 +28,7 @@ def mutate(shape):
     if np.random.uniform(0, 1) < gamma:
         shape.y = np.random.randint(shape.constraints['height'])
     if np.random.uniform(0, 1) < gamma:
-        shape.rad = np.random.randint(100)
+        shape.rad = np.random.randint(50)
     if np.random.uniform(0, 1) < gamma:
         shape.alpha = float('{:.2f}'.format(np.random.choice(np.arange(0, 1, 0.05))))
     if np.random.uniform(0, 1) < gamma:
@@ -42,7 +36,8 @@ def mutate(shape):
     
     return shape
     
-target, constraints = read_image("../assets/face.jpg")
+filename = "../assets/alps"
+target, constraints = read_image(filename+".jpg")
 constraints['all_colours'] = list(target.getdata())
 
 target = np.array(target)
@@ -52,7 +47,7 @@ canvas[:] = 255
 # hyper params
 T_max = 1000
 T_min = 1
-delta_T = 0.1 # temperature decay
+delta_T = 0.05 # temperature decay
 temps = np.arange(T_max, T_min, -delta_T)
 theta = 1
 all_losses = []
@@ -82,7 +77,7 @@ for i in range(len(temps)):
             canvas = canvas_with_shape
             epsilon = epsilon_shape
             
-    elif np.exp(-epsilon / T) < np.random.uniform(0, 1):
+    elif np.exp(-epsilon / T) < np.random.uniform(0, 1): # not using Boltzmann Constant
         canvas = canvas_with_shape
         epsilon = epsilon_shape
         
@@ -94,7 +89,7 @@ plt.subplot(121)
 plt.imshow(canvas)
 plt.subplot(122)
 plt.imshow(target)
-plt.show()
+plt.savefig(filename+"_redraw.jpg")
     
 # animating image generation process
 # fig = plt.figure()
@@ -109,7 +104,4 @@ plt.show()
 #     all_images[i] = [plt.imshow(all_images[i], animated=True)]
     
 # anim = animation.ArtistAnimation(fig, all_images, blit=True, repeat_delay=5000)
-# plt.show()
-
-# plt.plot(temps, all_losses, color="green")
-# plt.show()
+# anim.save(filename+"_anim.gif", writer='imagemagick', fps=30)
