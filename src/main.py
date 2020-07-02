@@ -11,6 +11,13 @@ def get_score(og_img, gen_img):
     (score, diff) = compare_ssim(og_img, gen_img, full=True, multichannel=True)
         
     return score
+    
+def nrmse(og_img, gen_img):
+    mse = np.mean(np.square(og_img - gen_img))
+    rmse = np.sqrt(mse)
+    err = rmse / (og_img.max() - og_img.min())
+    
+    return err
 
 def read_image(path):
     img = Image.open(path)
@@ -61,6 +68,8 @@ for i in range(len(temps)):
     canvas_with_shape = shape.superimpose(canvas)
     epsilon = get_score(target, canvas)
     epsilon_shape = get_score(target, canvas_with_shape)
+    
+    print (nrmse(target, canvas), nrmse(target, canvas_with_shape))
     
     if epsilon_shape > epsilon > theta: # shape brings canvas closer to target
         
