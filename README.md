@@ -1,5 +1,5 @@
 # Metroplex
-Recreating pictures using shapes of different colours and sizes using Stochastic Optimization
+Recreating pictures using shapes of different colours and sizes via Stochastic Optimization
 
 ---
 
