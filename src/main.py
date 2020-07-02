@@ -1,7 +1,6 @@
 import cv2, math, random
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
 from PIL import Image
 from shapes import Shape
 
@@ -47,8 +46,8 @@ canvas[:] = 255
 # hyper params
 T_max = 1000
 T_min = 1
-delta_T = 0.05 # temperature decay
-temps = np.arange(T_max, T_min, -delta_T)
+T_delta = 0.05 # temperature decay
+temps = np.arange(T_max, T_min, -T_delta)
 theta = 1
 all_losses = []
 all_images = []
@@ -90,18 +89,3 @@ plt.imshow(canvas)
 plt.subplot(122)
 plt.imshow(target)
 plt.savefig(filename+"_redraw.jpg")
-    
-# animating image generation process
-# fig = plt.figure()
-# ax = plt.axes()
-# line, = ax.plot([], [], lw=2)
-
-# def init():
-#     line.set_data([], [])
-#     return line,
-
-# for i in range(len(all_images)):
-#     all_images[i] = [plt.imshow(all_images[i], animated=True)]
-    
-# anim = animation.ArtistAnimation(fig, all_images, blit=True, repeat_delay=5000)
-# anim.save(filename+"_anim.gif", writer='imagemagick', fps=30)
