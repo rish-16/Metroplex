@@ -28,15 +28,15 @@ def mutate(shape):
     if np.random.uniform(0, 1) < gamma:
         shape.y = np.random.randint(shape.constraints['height'])
     if np.random.uniform(0, 1) < gamma:
-        shape.rad = np.random.randint(100)
+        shape.rad = np.random.randint(75)
     if np.random.uniform(0, 1) < gamma:
-        shape.alpha = float('{:.2f}'.format(np.random.uniform(0, 1)))
+        shape.alpha = float('{:.2f}'.format(np.random.choice(np.arange(0, 1, 0.05))))
     if np.random.uniform(0, 1) < gamma:
         shape.colour = random.choice(shape.constraints['all_colours'])
     
     return shape
     
-target, constraints = read_image("../assets/sky.jpg")
+target, constraints = read_image("../assets/face.jpg")
 constraints['all_colours'] = list(target.getdata())
 
 target = np.array(target)
@@ -52,7 +52,7 @@ theta = 0.4
 all_losses = []
 all_images = []
 
-# augmented simulated annealing
+# simulated annealing
 for i in range(len(temps)):
     T = temps[i] # current temperature
    
