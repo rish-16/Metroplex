@@ -13,9 +13,8 @@ def get_score(og_img, gen_img):
     return score
     
 def nrmse(og_img, gen_img):
-    mse = np.mean(np.square(og_img - gen_img))
-    rmse = np.sqrt(mse)
-    err = rmse / (og_img.max() - og_img.min())
+    mse = np.sqrt(np.mean(np.square(og_img - gen_img)))
+    err = mse / (og_img.max() - og_img.min())
     
     return err
 
