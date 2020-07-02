@@ -4,6 +4,13 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from PIL import Image
 from shapes import Shape
+from skimage.measure import compare_ssim
+
+# standard SSIM score [-1, +1]
+def get_score(og_img, gen_img):
+    (score, diff) = compare_ssim(og_img, gen_img, full=True, multichannel=True)
+        
+    return score
 
 def read_image(path):
     img = Image.open(path)
@@ -40,48 +47,55 @@ canvas[:] = 255
 canvas = canvas.astype(np.int8)
 
 # hyper params
-T_max = 250
+T_max = 400
 T_min = 1
-delta_T = 0.9
+delta_T = 0.9 # temperature decay
 temps = np.arange(T_max, T_min, -delta_T)
 theta = 0.2
 all_losses = []
 all_images = []
 
-# simulated annealing
+# augmented simulated annealing
 for i in range(len(temps)):
-    T = temps[i]
+    T = temps[i] # current temperature
+   
+    shape = Shape(constraints)
     
-    shape = Shape(constraints) # random shape
+    canvas_with_shape = shape.superimpose(canvas)
+    epsilon = get_score(target, canvas)
+    epsilon_shape = get_score(target, canvas_with_shape)
     
-    canvas_with_shape, canvas = shape.superimpose(canvas) # C -> N
-    score = shape.get_score(target, canvas_with_shape) # ∆E
-    
-    all_losses.append(score)
-    
-    if score > theta: # accept good shapes only
+    if epsilon_shape > epsilon > theta: # shape brings canvas closer to target
         canvas = canvas_with_shape
-    elif np.exp(-score / T) > np.random.uniform(0, 1): # accept any reasonable shape
+        epsilon = epsilon_shape
+    elif np.exp(-epsilon / T) > np.random.uniform(0, 1):
         canvas = canvas_with_shape
-    else:
-        pass # shape has failed -> will not be part of generated image
-    
+        epsilon = epsilon_shape
+        
     all_images.append(canvas)
+    all_losses.append(epsilon)
+    
+plt.figure(1)
+plt.subplot(121)
+plt.imshow(all_images[-1])    
+plt.subplot(122)
+plt.imshow(canvas)
+plt.show()
     
 # animating image generation process
-fig = plt.figure()
-ax = plt.axes()
-line, = ax.plot([], [], lw=2)
+# fig = plt.figure()
+# ax = plt.axes()
+# line, = ax.plot([], [], lw=2)
 
-def init():
-    line.set_data([], [])
-    return line,
+# def init():
+#     line.set_data([], [])
+#     return line,
 
-for i in range(len(all_images)):
-    all_images[i] = [plt.imshow(all_images[i], animated=True)]
+# for i in range(len(all_images)):
+#     all_images[i] = [plt.imshow(all_images[i], animated=True)]
     
-anim = animation.ArtistAnimation(fig, all_images, blit=True, repeat_delay=5000)
-plt.show()
+# anim = animation.ArtistAnimation(fig, all_images, blit=True, repeat_delay=5000)
+# plt.show()
 
 # plt.plot(temps, all_losses, color="green")
 # plt.show()
