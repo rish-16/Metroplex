@@ -1,8 +1,30 @@
-import cv2, math, random
+import cv2, math, random, argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 from shapes import Shape
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", help="Input image path")
+parser.add_argument("-o", "--output", help="Output image path")
+parser.add_argument("--solo", help="Whether output should be side-by-side comparison or generated image only", action="store_true")
+args = parser.parse_args()
+    
+def get_op_filename(filename):
+    path = filename.split(".")
+    ext = path[-1]
+    filepath = ".".join(path[:-1]) + "_output."
+    return  filepath + ext
+    
+if args.input == False:
+    raise FileNotFoundError("Input filepath required.")
+else:
+    filename = args.input
+    
+    if args.output == False:
+        op_filename = ""
+    else:
+        op_filename = get_op_filename(filename)
 
 # normalized to [0, 1]
 def nrmse(og_img, gen_img):
@@ -13,6 +35,7 @@ def nrmse(og_img, gen_img):
 
 def read_image(path):
     img = Image.open(path)
+    print ("Loaded image at '{}'".format(path))
     
     constraints = {}
     constraints['width'] = max(np.array(img).shape[:2])
@@ -35,8 +58,7 @@ def mutate(shape):
     
     return shape
     
-filename = "../assets/alps"
-target, constraints = read_image(filename+".jpg")
+target, constraints = read_image(filename)
 constraints['all_colours'] = list(target.getdata())
 
 target = np.array(target)
@@ -53,6 +75,7 @@ all_losses = []
 all_images = []
 
 # simulated annealing
+print ("Generating image...")
 for i in range(len(temps)):
     T = temps[i] # current temperature
    
@@ -83,9 +106,14 @@ for i in range(len(temps)):
     all_images.append(canvas)
     all_losses.append(epsilon)
     
-plt.figure(1)
-plt.subplot(121)
-plt.imshow(canvas)
-plt.subplot(122)
-plt.imshow(target)
-plt.savefig(filename+"_redraw.jpg")
+if args.solo == True: # generated image only    
+    plt.imshow(canvas)
+else:
+    plt.figure(1)
+    plt.subplot(121)
+    plt.imshow(canvas)
+    plt.subplot(122)
+    plt.imshow(target)
+    
+plt.savefig(op_filename)
+print ("Image saved at '{}'".format(op_filename))

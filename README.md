@@ -23,13 +23,15 @@ $ git clone https://github.com/rish-16/Metroplex.git
 $ cd Metroplex/src
 ```
 
-Visit the `main.py` file and change the image path in the `filename` variable on line `38`. Run the program from your terminal/command prompt:
-
 ```bash
-$ python main.py
+$ python main.py -i "./my_img.jpg" -o ".my_output.jpg" --solo True
 ```
 
-> **Note:** I'm planning on making a CLI wrapper so it's simpler to upload images and retrieve the generated output.
+| Flag               | Value   | Description                                                                                              |
+|--------------------|---------|----------------------------------------------------------------------------------------------------------|
+| `-i` or `--input`  | String  | Path to input image                                                                                      |
+| `-o` or `--output` | String  | Path to output image (optional)<br><br>If not present, defaults to `"<<filepath>>_output.jpg"`           |
+| `--solo`           | Boolean | Whether output should be a side-to-side<br>comparison or generated image only<br><br>Defaults to `False` |
 
 ---
 
