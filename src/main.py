@@ -107,13 +107,18 @@ for i in range(len(temps)):
     all_losses.append(epsilon)
     
 if args.solo == True: # generated image only    
+    plt.tight_layout()
     plt.imshow(canvas)
+    plt.axis("off")
 else:
+    plt.tight_layout()
     plt.figure(1)
     plt.subplot(121)
     plt.imshow(canvas)
+    plt.axis("off")
     plt.subplot(122)
     plt.imshow(target)
+    plt.axis("off")
     
 plt.savefig(op_filename)
 print ("Image saved at '{}'".format(op_filename))
