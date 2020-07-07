@@ -7,10 +7,10 @@ Recreating pictures using shapes of different colours and sizes via Stochastic O
 
 Here are some sample images I converted using `Metroplex`. They aren't perfect by any chance. Lots of work left to do – but we'll get there.
 
-<img src="./assets/earth_redraw.jpg">
-<img src="./assets/alps_redraw.jpg">
-<img src="./assets/face_redraw.jpg">
-<img src="./assets/sky_redraw.jpg">
+<img src="./assets/earth_output.jpg">
+<img src="./assets/alps_output.jpg">
+<img src="./assets/face_output.jpg">
+<img src="./assets/sky_output.jpg">
 
 ---
 
