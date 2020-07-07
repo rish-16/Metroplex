@@ -24,7 +24,7 @@ $ cd Metroplex/src
 ```
 
 ```bash
-$ python main.py -i "./my_img.jpg" -o ".my_output.jpg" --solo
+$ python main.py -i "./path_to_input_img.jpg" -o "./path_to_output_img.jpg" --solo
 ```
 
 | Flag               | Value   | Description                                                                                              |
