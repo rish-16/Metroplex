@@ -24,14 +24,14 @@ $ cd Metroplex/src
 ```
 
 ```bash
-$ python main.py -i "./my_img.jpg" -o ".my_output.jpg" --solo True
+$ python main.py -i "./my_img.jpg" -o ".my_output.jpg" --solo
 ```
 
 | Flag               | Value   | Description                                                                                              |
 |--------------------|---------|----------------------------------------------------------------------------------------------------------|
 | `-i` or `--input`  | String  | Path to input image                                                                                      |
 | `-o` or `--output` | String  | Path to output image (optional)<br><br>If not present, defaults to `"<<filepath>>_output.jpg"`           |
-| `--solo`           | Boolean | Whether output should be a side-to-side<br>comparison or generated image only<br><br>Defaults to `False` |
+| `--solo`           | N/A     | Whether output should be a side-to-side<br>comparison or generated image only<br><br>Defaults to `False` |
 
 ---
 
