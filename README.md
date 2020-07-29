@@ -20,7 +20,9 @@ Clone the repository and enter the `src` directory:
 
 ```bash
 $ git clone https://github.com/rish-16/Metroplex.git
-$ cd Metroplex/src
+$ cd Metroplex
+$ pip install -r requirements.txt
+$ cd src
 ```
 
 ```bash
